@@ -9,13 +9,15 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:xandriaai.showPanel"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "xandriaai.helloWorld",
-        "title": "Hello World"
+        "command": "xandriaai.showPanel",
+        "title": "Xandria AI: Show Panel"
       }
     ]
   },

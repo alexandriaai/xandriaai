@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { SnippetPanel } from './SnippetPanel';  // You’ll create this next
+import { SnippetPanel } from './SnippetPanel';
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('xandriaai.showPanel', () => {
-      SnippetPanel.createOrShow(context.extensionUri);
+      SnippetPanel.createOrShow(context.extensionUri); // ✅ Only this!
     })
   );
 }
