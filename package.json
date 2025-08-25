@@ -3,23 +3,29 @@
   "displayName": "XandriaAI",
   "description": "AI-Powered Coding Assistant that suggests code snippets.",
   "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.103.0"
-  },
-  "categories": [
-    "Other"
-  ],
+  "engines": { "vscode": "^1.103.0" },
+  "categories": ["Other"],
   "activationEvents": [
-    "onCommand:xandriaai.showPanel"
+    "onCommand:xandriaai.showPanel",
+    "onCommand:xandriaai.captureAndSend"
   ],
+  
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
-      {
-        "command": "xandriaai.showPanel",
-        "title": "Xandria AI: Show Panel"
+      { "command": "xandriaai.showPanel", "title": "Xandria AI: Show Panel" },
+      { "command": "xandriaai.captureAndSend", "title": "Xandria AI: Capture & Send Code" }
+    ],
+    "configuration": {
+      "title": "Xandria AI",
+      "properties": {
+        "xandriaai.backendUrl": {
+          "type": "string",
+          "default": "http://localhost:5000/analyze",
+          "description": "Backend endpoint that receives selected code."
+        }
       }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
