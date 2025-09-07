@@ -1,83 +1,64 @@
 import * as vscode from 'vscode';
+import { ApiClient } from './apiClient';
 
 export class SnippetPanel {
-  public static createOrShow(extensionUri: vscode.Uri) {
+  public static createOrShow(extensionUri: vscode.Uri, context?: vscode.ExtensionContext) {
     const panel = vscode.window.createWebviewPanel(
       'snippetPanel',
       'Xandria AI',
       vscode.ViewColumn.One,
-      {
-        enableScripts: true
-      }
+      { enableScripts: true }
     );
 
     panel.webview.html = this.getHtml(panel.webview, extensionUri);
+    const client = context ? new ApiClient(context) : undefined;
 
     panel.webview.onDidReceiveMessage(
-      (message) => {
+      async (message) => {
         if (message.command === 'getSnippet') {
-          const snippets = [
-            "console.log('Hello, World!');",
-            "function sum(a, b) { return a + b; }",
-            "const square = x => x * x;",
-            "for (let i = 0; i < 10; i++) { console.log(i); }"
-          ];
-          const random = Math.floor(Math.random() * snippets.length);
-          panel.webview.postMessage({
-            command: 'displaySnippet',
-            snippet: snippets[random]
-          });
+          try {
+            const editor = vscode.window.activeTextEditor;
+            const selection = editor ? editor.document.getText(editor.selection) : '';
+            const language = editor ? editor.document.languageId : 'plaintext';
+
+            if (!client) throw new Error('API client not available');
+
+            const result = await client.getSuggestedSnippet({
+              language,
+              codeContext: selection || (editor ? editor.document.getText() : '')
+            });
+
+            panel.webview.postMessage({ command: 'displaySnippet', snippet: result.snippet });
+          } catch (err: any) {
+            const msg = err?.message ?? String(err);
+            vscode.window.showErrorMessage(`XandriaAI: ${msg}`);
+            panel.webview.postMessage({ command: 'displaySnippet', snippet: `⚠️ ${msg}` });
+          }
         }
       },
-      undefined,
-      []
+      undefined
     );
   }
 
-  private static getHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
+  private static getHtml(_webview: vscode.Webview, _extensionUri: vscode.Uri) {
     return `
       <!DOCTYPE html>
       <html lang="en">
       <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Xandria AI</title>
         <style>
-          body {
-            font-family: sans-serif;
-            padding: 1rem;
-            background-color: #1e1e1e;
-            color: #ffffff;
-          }
-          #snippetBox {
-            width: 100%;
-            height: 150px;
-            background: #333;
-            padding: 10px;
-            border: 1px solid #555;
-            border-radius: 4px;
-            color: white;
-            white-space: pre-wrap;
-          }
-          button {
-            margin-top: 1rem;
-            padding: 0.5rem 1rem;
-            background-color: #007acc;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-          }
-          button:hover {
-            background-color: #005f99;
-          }
+          body { font-family: sans-serif; padding: 1rem; background: #1e1e1e; color: #fff; }
+          #snippetBox { width: 100%; min-height: 200px; background: #111; border-radius: 6px; padding: 12px; white-space: pre-wrap; }
+          button { padding: 8px 12px; border-radius: 6px; border: 0; margin: 0.5rem 0; cursor: pointer; }
         </style>
       </head>
       <body>
-        <h1>Code Snippet Generator</h1>
-        <div id="snippetBox">Press the button to generate a snippet...</div>
+        <h2>🔮 Xandria AI</h2>
+        <p>Select some code in the editor (optional) and click Generate.</p>
         <button id="generateSnippet">Generate Snippet</button>
-
+        <pre id="snippetBox">No snippet yet…</pre>
         <script>
           const vscode = acquireVsCodeApi();
           document.getElementById('generateSnippet').addEventListener('click', () => {
@@ -95,3 +76,4 @@ export class SnippetPanel {
     `;
   }
 }
+
