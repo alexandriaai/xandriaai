@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { SnippetPanel } from './SnippetPanel';
+import {registerFeedbackButton} from './Feedback_Button';
 
 export function activate(context: vscode.ExtensionContext) {
   // Show panel
@@ -23,7 +24,9 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage('XandriaAI token saved securely.');
       }
     })
+  
   );
+  registerFeedbackButton(context);
 }
 
 export function deactivate() {}

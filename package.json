@@ -10,7 +10,9 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:xandriaai.showPanel"
+    "onCommand:xandriaai.showPanel",
+    "onCommand:xandriaai.sendFeedback"
+    
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -18,6 +20,10 @@
       {
         "command": "xandriaai.showPanel",
         "title": "Xandria AI: Show Panel"
+      },
+      {
+        "command": "xandriaai.sendFeedback",
+        "title": "Xandria AI: Send Feedback"
       }
     ]
   },
