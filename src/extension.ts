@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { SnippetPanel } from './SnippetPanel';
 import {registerFeedbackButton} from './Feedback_Button';
+//import {registerInlineProvider} from './inlinesuggestion';
 
 export function activate(context: vscode.ExtensionContext) {
   // Show panel
@@ -27,6 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
   
   );
   registerFeedbackButton(context);
+  //registerInlineProvider(context);
 }
 
 export function deactivate() {}

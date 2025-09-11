@@ -11,8 +11,10 @@
   ],
   "activationEvents": [
     "onCommand:xandriaai.showPanel",
-    "onCommand:xandriaai.sendFeedback"
-    
+    "onCommand:xandriaai.sendFeedback",
+    "onLanguage:java",
+    "onLanguage:python",
+    "onLanguage:cpp"
   ],
   "main": "./out/extension.js",
   "contributes": {
