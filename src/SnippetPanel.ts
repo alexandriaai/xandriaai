@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ApiClient } from './apiClient';
 
+
 export class SnippetPanel {
   public static createOrShow(extensionUri: vscode.Uri, context?: vscode.ExtensionContext) {
     const panel = vscode.window.createWebviewPanel(

@@ -3,6 +3,7 @@
   "displayName": "XandriaAI",
   "description": "AI-Powered Coding Assistant that suggests code snippets.",
   "version": "0.0.1",
+  "publisher": "your-name-or-org", 
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -12,6 +13,8 @@
   "activationEvents": [
     "onCommand:xandriaai.showPanel",
     "onCommand:xandriaai.sendFeedback",
+    "onCommand:xandriaai.testAnalyze",
+    "onCommand:xandriaai.setApiToken",
     "onLanguage:java",
     "onLanguage:python",
     "onLanguage:cpp"
@@ -21,11 +24,23 @@
     "commands": [
       {
         "command": "xandriaai.showPanel",
-        "title": "Xandria AI: Show Panel"
+        "title": "Show Panel",
+        "category": "XandriaAI"
       },
       {
         "command": "xandriaai.sendFeedback",
-        "title": "Xandria AI: Send Feedback"
+        "title": "Send Feedback",
+        "category": "XandriaAI"
+      },
+      {
+        "command": "xandriaai.testAnalyze",
+        "title": "Test Analyze",
+        "category": "XandriaAI"
+      },
+      {
+        "command": "xandriaai.setApiToken",
+        "title": "Set API Token",
+        "category": "XandriaAI"
       }
     ]
   },
