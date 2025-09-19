@@ -1,22 +1,29 @@
 import * as vscode from 'vscode';
 import { SnippetPanel } from './SnippetPanel';
 import { registerFeedbackButton } from './Feedback_Button';
-// import { registerInlineProvider } from './inlinesuggestion';
 import { ApiClient } from './apiClient';
+import { formatResponse } from './ResponseFormatter';  // ✅ Use external formatter
 
 export function activate(context: vscode.ExtensionContext) {
+  console.log("🚀 XandriaAI extension activating...");
   console.log("[XandriaAI] Extension activated ✅");
 
+  // ---------------------
   // Show main snippet panel
+  // ---------------------
   context.subscriptions.push(
     vscode.commands.registerCommand('xandriaai.showPanel', () => {
+      console.log("✅ Command triggered: xandriaai.showPanel");
       SnippetPanel.createOrShow(context.extensionUri, context);
     })
   );
 
+  // ---------------------
   // Store API token in VS Code SecretStorage
+  // ---------------------
   context.subscriptions.push(
     vscode.commands.registerCommand('xandriaai.setApiToken', async () => {
+      console.log("✅ Command triggered: xandriaai.setApiToken");
       const token = await vscode.window.showInputBox({
         prompt: 'Enter XandriaAI API token',
         ignoreFocusOut: true,
@@ -30,7 +37,9 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // Run code analysis on current file or selection
+  // ---------------------
+  // Run code analysis on current file or selection (AST parser work)
+  // ---------------------
   context.subscriptions.push(
     vscode.commands.registerCommand('xandriaai.testAnalyze', async () => {
       const editor = vscode.window.activeTextEditor;
@@ -60,11 +69,44 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // Feedback button in status bar
+  // ---------------------
+  // Format and Send (Response Formatter work)
+  // ---------------------
+  context.subscriptions.push(
+    vscode.commands.registerCommand('xandriaai.formatAndSend', () => {
+      console.log("✅ Command registered and running: xandriaai.formatAndSend");
+
+      // Simulated subsystem results for now
+      const rawResults = {
+        snippetGenerator: { code: "console.log('Hello Xandria');" },
+        docLookup: { reference: "https://docs.example.com/api" },
+        feedback: { user: "Looks good!" }
+      };
+
+      const formatted = formatResponse(rawResults);
+      console.log("📦 Formatted JSON:", formatted);
+
+      // Send JSON to panel (ensure SnippetPanel has a handler for this)
+      SnippetPanel.currentPanel?.postMessage({
+        type: 'formattedResponse',
+        data: formatted
+      });
+
+      vscode.window.showInformationMessage('Formatted response sent to panel.');
+    })
+  );
+
+  console.log("✅ All commands registered: showPanel, setApiToken, testAnalyze, formatAndSend");
+
+  // ---------------------
+  // Register feedback button
+  // ---------------------
   registerFeedbackButton(context);
 
   // If you later want inline suggestions, re-enable this:
   // registerInlineProvider(context);
 }
 
-export function deactivate() {}
+export function deactivate() {
+  console.log("🛑 XandriaAI extension deactivated");
+}

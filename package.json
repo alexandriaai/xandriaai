@@ -11,15 +11,17 @@
     "Other"
   ],
   "activationEvents": [
+    "*",
     "onCommand:xandriaai.showPanel",
     "onCommand:xandriaai.sendFeedback",
     "onCommand:xandriaai.testAnalyze",
     "onCommand:xandriaai.setApiToken",
     "onLanguage:java",
     "onLanguage:python",
-    "onLanguage:cpp"
+    "onLanguage:cpp",
+    "onCommand:xandriaai.formatAndSend"
   ],
-  "main": "./out/extension.js",
+  "main": "./out/src/extension.js",
   "contributes": {
     "commands": [
       {
@@ -40,6 +42,11 @@
       {
         "command": "xandriaai.setApiToken",
         "title": "Set API Token",
+        "category": "XandriaAI"
+      },
+      {
+        "command": "xandriaai.formatAndSend",    
+        "title": "Xandria AI: Format And Send",
         "category": "XandriaAI"
       }
     ]
