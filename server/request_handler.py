@@ -1,7 +1,7 @@
-#Ricky 2.1 ANd 4.2. Partt of the XandriaAI project
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from .openai_client import suggest_snippet
+import ast
 
 router = APIRouter()
 
@@ -23,13 +23,35 @@ class SnippetResponse(BaseModel):
 @router.post("/analyze")
 async def analyze_code(req: CodeRequest):
     """
-    Request handler for incoming code snippets (mock analysis).
-    Keep this for other subsystems (AST, SonarQube, Bandit, etc.).
+    Request handler for incoming code snippets.
+    Implements AST parsing for Python (Task 3.1).
+    Can be extended for other subsystems (SonarQube, Bandit, etc.).
     """
     if req.languageId == "python":
-        result = {"subsystem": "AST Parser", "status": "parsed"}
+        try:
+            # Parse Python code into an AST
+            tree = ast.parse(req.code)
+
+            # Extract functions and classes
+            functions = [node.name for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)]
+            classes = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
+
+            result = {
+                "subsystem": "AST Parser",
+                "status": "parsed",
+                "functions": functions,
+                "classes": classes
+            }
+        except SyntaxError as e:
+            result = {
+                "subsystem": "AST Parser",
+                "status": "error",
+                "message": f"Syntax error: {str(e)}"
+            }
+
     elif req.languageId in ["javascript", "typescript"]:
         result = {"subsystem": "Inline Suggestions", "status": "handled"}
+
     else:
         result = {"subsystem": "Fallback", "status": "unsupported"}
 
@@ -52,4 +74,3 @@ async def snippet(req: SnippetRequest):
     except Exception as exc:
         # Surface a clean error to the extension
         raise HTTPException(status_code=500, detail=f"Snippet generation failed: {exc}")
-
