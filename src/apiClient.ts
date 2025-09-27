@@ -1,4 +1,4 @@
-// Ricky Morival 1.4 Setion 
+// Ricky Morival 1.4 Section + Alexandra Sanzare 3.1 Section
 
 import * as vscode from 'vscode';
 import * as https from 'https';
@@ -16,7 +16,7 @@ export class ApiClient {
   private get config() {
     const cfg = vscode.workspace.getConfiguration('xandriaai');
     return {
-      baseUrl: String(cfg.get('serverBaseUrl') || 'https://localhost:8443'),
+      baseUrl: String(cfg.get('serverBaseUrl') || 'http://127.0.0.1:8000'), // 👈 default backend
       allowInsecure: Boolean(cfg.get('allowInsecureTls') || false),
       timeoutMs: Number(cfg.get('requestTimeoutMs') || 10000),
     };
@@ -31,7 +31,6 @@ export class ApiClient {
     let timeout: NodeJS.Timeout | undefined;
     let finalSignal = signal;
 
-    // Only create a timeout if no signal is provided
     if (!signal) {
       controller = new AbortController();
       timeout = setTimeout(() => controller!.abort(), timeoutMs);
@@ -47,9 +46,6 @@ export class ApiClient {
           'Accept': 'application/json',
         },
         body: body ? JSON.stringify(body) : undefined,
-        // Node 18+ fetch supports passing an https.Agent
-        // for local/self-signed development when enabled in settings:
-        // xandriaai.allowInsecureTls = true
         // @ts-ignore
         agent: allowInsecure ? new https.Agent({ rejectUnauthorized: false }) : undefined,
         signal: finalSignal
@@ -73,8 +69,13 @@ export class ApiClient {
     }
   }
 
-  // Convenience endpoint
+  // 4.2 – OpenAI snippet suggestion
   async getSuggestedSnippet(payload: { language: string; codeContext: string }): Promise<{snippet:string}> {
     return this.request<{snippet:string}>({ path: '/api/snippet', method: 'POST', body: payload });
+  }
+
+  // 3.1 – AST analysis
+  async analyzeCode(payload: { code: string; languageId: string; fileName: string }): Promise<any> {
+    return this.request<any>({ path: '/api/analyze', method: 'POST', body: payload });
   }
 }
