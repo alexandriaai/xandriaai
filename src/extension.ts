@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { SnippetPanel } from './SnippetPanel';
 import { registerFeedbackButton } from './Feedback_Button';
 import { ApiClient } from './apiClient';
-import { formatResponse } from './ResponseFormatter';  // ✅ Use external formatter
+import { formatResponse } from './ResponseFormatter';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("🚀 XandriaAI extension activating...");
@@ -19,7 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // ---------------------
-  // Store API token in VS Code SecretStorage
+  // Store API token
   // ---------------------
   context.subscriptions.push(
     vscode.commands.registerCommand('xandriaai.setApiToken', async () => {
@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // ---------------------
-  // Run code analysis on current file or selection (AST parser work)
+  // Run code analysis (3.1 AST Parser)
   // ---------------------
   context.subscriptions.push(
     vscode.commands.registerCommand('xandriaai.testAnalyze', async () => {
@@ -54,29 +54,28 @@ export function activate(context: vscode.ExtensionContext) {
 
       try {
         const client = new ApiClient(context);
-        const response = await client.getSuggestedSnippet({
-          language,
-          codeContext: code
+        const result = await client.analyzeCode({
+          code,
+          languageId: language,
+          fileName: editor.document.fileName
         });
+
         vscode.window.showInformationMessage(
-          `XandriaAI response: ${response.snippet}`
+          `AST Parser: Found ${result.analysis.functions.length} functions and ${result.analysis.classes.length} classes`
         );
       } catch (err: any) {
-        vscode.window.showErrorMessage(
-          `Failed to analyze code: ${err?.message || err}`
-        );
+        vscode.window.showErrorMessage(`Failed to analyze code: ${err?.message || err}`);
       }
     })
   );
 
   // ---------------------
-  // Format and Send (Response Formatter work)
+  // Format and Send (2.3 Response Formatter)
   // ---------------------
   context.subscriptions.push(
     vscode.commands.registerCommand('xandriaai.formatAndSend', () => {
       console.log("✅ Command registered and running: xandriaai.formatAndSend");
 
-      // Simulated subsystem results for now
       const rawResults = {
         snippetGenerator: { code: "console.log('Hello Xandria');" },
         docLookup: { reference: "https://docs.example.com/api" },
@@ -86,7 +85,6 @@ export function activate(context: vscode.ExtensionContext) {
       const formatted = formatResponse(rawResults);
       console.log("📦 Formatted JSON:", formatted);
 
-      // Send JSON to panel (ensure SnippetPanel has a handler for this)
       SnippetPanel.currentPanel?.postMessage({
         type: 'formattedResponse',
         data: formatted
@@ -102,9 +100,6 @@ export function activate(context: vscode.ExtensionContext) {
   // Register feedback button
   // ---------------------
   registerFeedbackButton(context);
-
-  // If you later want inline suggestions, re-enable this:
-  // registerInlineProvider(context);
 }
 
 export function deactivate() {
