@@ -3,6 +3,9 @@ from pydantic import BaseModel
 from .openai_client import suggest_snippet
 import ast
 
+#import the bandit runner
+from .bandit_runner import run_bandit
+
 router = APIRouter()
 
 # ----- Schemas -----
@@ -18,7 +21,7 @@ class SnippetRequest(BaseModel):
 class SnippetResponse(BaseModel):
     snippet: str
 
-# ----- Routes -----
+# Routes 
 
 @router.post("/analyze")
 async def analyze_code(req: CodeRequest):
@@ -74,3 +77,17 @@ async def snippet(req: SnippetRequest):
     except Exception as exc:
         # Surface a clean error to the extension
         raise HTTPException(status_code=500, detail=f"Snippet generation failed: {exc}")
+
+#Bandit (Task 5.1) 
+
+@router.get("/security/bandit")
+async def security_bandit():
+    """
+    Run Bandit security scan and return parsed findings.
+    GET /api/security/bandit  (depending on how app mounts this router)
+    """
+    report = run_bandit(["server"])
+    if not report.get("ok"):
+        # return an error status with the message from Bandit runner
+        raise HTTPException(status_code=500, detail=report.get("error", "Bandit failed"))
+    return report
