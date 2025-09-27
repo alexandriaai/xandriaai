@@ -3,7 +3,7 @@
   "displayName": "XandriaAI",
   "description": "AI-Powered Coding Assistant that suggests code snippets.",
   "version": "0.0.1",
-  "publisher": "your-name-or-org", 
+  "publisher": "your-name-or-org",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -45,7 +45,7 @@
         "category": "XandriaAI"
       },
       {
-        "command": "xandriaai.formatAndSend",    
+        "command": "xandriaai.formatAndSend",
         "title": "Xandria AI: Format And Send",
         "category": "XandriaAI"
       }
@@ -63,6 +63,7 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.18.1",
     "@types/vscode": "^1.103.0",
@@ -71,6 +72,9 @@
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.32.0",
+    "jest": "^30.1.3",
+    "sonar-scanner": "^3.1.0",
+    "ts-jest": "^29.4.4",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   },

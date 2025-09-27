@@ -12,6 +12,10 @@
 	
 	"xandriaai.serverBaseUrl": "http://localhost:8001",
 "xandriaai.allowInsecureTls": false,
-"xandriaai.requestTimeoutMs": 10000
+"xandriaai.requestTimeoutMs": 10000,
+"sonarlint.connectedMode.project": {
+	"connectionId": "http-localhost-9000",
+	"projectKey": "xandriaai"
+}
 
 }
