@@ -7,9 +7,7 @@
   "engines": {
     "vscode": "^1.103.0"
   },
-  "categories": [
-    "Other"
-  ],
+  "categories": ["Other"],
   "activationEvents": [
     "*",
     "onCommand:xandriaai.showPanel",
@@ -49,7 +47,28 @@
         "title": "Xandria AI: Format And Send",
         "category": "XandriaAI"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "XandriaAI",
+      "properties": {
+        "xandriaai.serverBaseUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:8443",
+          "markdownDescription": "Base URL for the XandriaAI backend server (e.g. http://127.0.0.1:8443 or https://your-host)."
+        },
+        "xandriaai.allowInsecureTls": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Allow insecure/self-signed TLS certificates (use **true** only for local development)."
+        },
+        "xandriaai.requestTimeoutMs": {
+          "type": "number",
+          "default": 15000,
+          "minimum": 1000,
+          "markdownDescription": "HTTP request timeout in milliseconds for calls from the extension to the backend."
+       }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

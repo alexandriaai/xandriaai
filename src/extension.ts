@@ -3,11 +3,19 @@ import { SnippetPanel } from './SnippetPanel';
 import { registerFeedbackButton } from './Feedback_Button';
 import { ApiClient } from './apiClient';
 import { formatResponse } from './ResponseFormatter';
+import { registerInlineProvider } from './inlineProvider';
+
+
+   
+
+
+
+
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("🚀 XandriaAI extension activating...");
   console.log("[XandriaAI] Extension activated ✅");
-
+  registerInlineProvider(context);
   // ---------------------
   // Show main snippet panel
   // ---------------------

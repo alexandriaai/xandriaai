@@ -4,6 +4,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .request_handler import router as request_router
 
+from dotenv import load_dotenv
+load_dotenv()  # load .env file automatically
+
 app = FastAPI(title="XandriaAI Backend")
 
 # Allow the VS Code extension to call us

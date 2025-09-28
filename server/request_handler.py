@@ -1,9 +1,12 @@
+# server/request_handler.py
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from .openai_client import suggest_snippet
 import ast
 
-#import the bandit runner
+# AI provider: use Gemini (replace old OpenAI import)
+from .gemini_client import suggest_snippet_with_gemini
+
+# Bandit security scan (Task 5.1)
 from .bandit_runner import run_bandit
 
 router = APIRouter()
@@ -21,7 +24,8 @@ class SnippetRequest(BaseModel):
 class SnippetResponse(BaseModel):
     snippet: str
 
-# Routes 
+
+# ----- Routes -----
 
 @router.post("/analyze")
 async def analyze_code(req: CodeRequest):
@@ -64,21 +68,20 @@ async def analyze_code(req: CodeRequest):
         "analysis": result
     }
 
+
 @router.post("/snippet", response_model=SnippetResponse)
 async def snippet(req: SnippetRequest):
     """
-    4.2 OpenAI API Integration
+    Returns an AI-generated code snippet using Google Gemini (or a fallback if no key).
     Called by the VS Code extension (src/apiClient.ts) at /api/snippet.
-    Returns a single suggested code snippet as { "snippet": "..." }.
     """
     try:
-        snippet_text = suggest_snippet(req.language, req.codeContext)
+        snippet_text = suggest_snippet_with_gemini(req.language, req.codeContext)
         return SnippetResponse(snippet=snippet_text)
     except Exception as exc:
         # Surface a clean error to the extension
         raise HTTPException(status_code=500, detail=f"Snippet generation failed: {exc}")
 
-#Bandit (Task 5.1) 
 
 @router.get("/security/bandit")
 async def security_bandit():
@@ -91,3 +94,4 @@ async def security_bandit():
         # return an error status with the message from Bandit runner
         raise HTTPException(status_code=500, detail=report.get("error", "Bandit failed"))
     return report
+
