@@ -7,7 +7,9 @@
   "engines": {
     "vscode": "^1.103.0"
   },
-  "categories": ["Other"],
+  "categories": [
+    "Other"
+  ],
   "activationEvents": [
     "*",
     "onCommand:xandriaai.showPanel",
@@ -66,7 +68,7 @@
           "default": 15000,
           "minimum": 1000,
           "markdownDescription": "HTTP request timeout in milliseconds for calls from the extension to the backend."
-       }
+        }
       }
     }
   },
@@ -83,7 +85,6 @@
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
-    "@types/mocha": "^10.0.10",
     "@types/node": "^22.18.1",
     "@types/vscode": "^1.103.0",
     "@typescript-eslint/eslint-plugin": "^8.39.0",
