@@ -1,0 +1,41 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "python",
+      "camelcase": "Python",
+      "title": "Python tree sitter",
+      "scope": "source.python",
+      "file-types": [
+        "python"
+      ],
+      "injection-regex": "^python$",
+      "class-name": "TreeSitterPython"
+    }
+  ],
+ "parser-directories": [
+    "C:\\Users\\Cameron\\Downloads\\xandriaai\\tree-sitter-python\\test.py"
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "A tree sitter that supports python",
+    "authors": [
+      {
+        "name": "Cameron Parker"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/alexandriaai/xandriaai.git"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true,
+    "zig": false
+  }
+}
