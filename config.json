@@ -1,0 +1,45 @@
+
+
+{
+  "projectName": "XandriaAI",
+  "version": "1.0.0",
+
+  "backend": {
+    "url": "http://127.0.0.1:8000",
+    "port": 8000,
+    "reload": true
+  },
+
+  "frontend": {
+    "theme": "dark",
+    "languageSupport": ["python", "typescript"],
+    "showLogs": true
+  },
+
+  "analysis": {
+    "useSonarCloud": true,
+    "useBandit": true,
+    "sonarProjectKey": "xandriaai-project-key",
+    "sonarOrganization": "xandria-org",
+    "qualityGate": "strict"
+  },
+
+  "subsystems": {
+    "active": ["snippetGenerator", "docLookup", "feedback"],
+    "snippetGenerator": {
+      "model": "gpt-5",
+      "maxTokens": 300
+    },
+    "docLookup": {
+      "indexPath": "./data/docs_index.json"
+    },
+    "feedback": {
+      "enabled": true
+    }
+  },
+
+  "logging": {
+    "level": "debug",
+    "file": "./logs/xandria.log"
+  }
+}
