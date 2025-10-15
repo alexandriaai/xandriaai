@@ -4,18 +4,30 @@ import { registerFeedbackButton } from './Feedback_Button';
 import { ApiClient } from './apiClient';
 import { formatResponse } from './ResponseFormatter';
 import { registerInlineProvider } from './inlineProvider';
+import * as fs from "fs";
+import * as path from "path";
 
+let config: any;
 
-   
+try {
+  const configPath = path.join(__dirname, "..", "config.json");
+  const rawData = fs.readFileSync(configPath, "utf-8");
+  config = JSON.parse(rawData);
+  console.log(`[XandriaAI] Loaded config for ${config.projectName} v${config.version}`);
+  console.log(`[XandriaAI] Active subsystems: ${config.subsystems.active.join(", ")}`);
+} catch (err) {
+  console.error("[XandriaAI] Failed to load config.json:", err);
+}
 
-
-
-
-
+// ---------------------
+// Extension Activation
+// ---------------------
 export function activate(context: vscode.ExtensionContext) {
   console.log("🚀 XandriaAI extension activating...");
   console.log("[XandriaAI] Extension activated ✅");
+
   registerInlineProvider(context);
+
   // ---------------------
   // Show main snippet panel
   // ---------------------
@@ -25,6 +37,15 @@ export function activate(context: vscode.ExtensionContext) {
       SnippetPanel.createOrShow(context.extensionUri, context);
     })
   );
+
+  // ---------------------
+  // Display config-based message (optional)
+  // ---------------------
+  if (config && config.frontend?.showLogs) {
+    vscode.window.showInformationMessage(
+      `🚀 ${config.projectName} loaded (Theme: ${config.frontend.theme})`
+    );
+  }
 
   // ---------------------
   // Store API token
@@ -110,6 +131,9 @@ export function activate(context: vscode.ExtensionContext) {
   registerFeedbackButton(context);
 }
 
+// ---------------------
+// Extension Deactivation
+// ---------------------
 export function deactivate() {
   console.log("🛑 XandriaAI extension deactivated");
 }
