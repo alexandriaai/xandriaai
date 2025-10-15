@@ -1,11 +1,9 @@
-
-
 {
   "projectName": "XandriaAI",
   "version": "1.0.0",
 
   "backend": {
-    "url": "http://127.0.0.1:8000",
+    "uri": "http://127.0.0.1:8000",
     "port": 8000,
     "reload": true
   },
@@ -26,13 +24,16 @@
 
   "subsystems": {
     "active": ["snippetGenerator", "docLookup", "feedback"],
+
     "snippetGenerator": {
       "model": "gpt-5",
-      "maxTokens": 300
+      "maxTokens": 500
     },
+
     "docLookup": {
       "indexPath": "./data/docs_index.json"
     },
+
     "feedback": {
       "enabled": true
     }
