@@ -6,15 +6,22 @@ import { formatResponse } from './ResponseFormatter';
 import { registerInlineProvider } from './inlineProvider';
 import * as fs from "fs";
 import * as path from "path";
+console.log("🟣 XandriaAI Extension Booting — Debug Logging Enabled");
+
 
 let config: any;
 
 try {
-  const configPath = path.join(__dirname, "..", "config.json");
+  // look both in out/.. and directly in extension root
+  const rootPath = path.join(__dirname, "..", "config.json");
+  const fallbackPath = path.join(__dirname, "../..", "config.json");
+
+  const configPath = fs.existsSync(rootPath) ? rootPath : fallbackPath;
   const rawData = fs.readFileSync(configPath, "utf-8");
   config = JSON.parse(rawData);
-  console.log(`[XandriaAI] Loaded config for ${config.projectName} v${config.version}`);
-  console.log(`[XandriaAI] Active subsystems: ${config.subsystems.active.join(", ")}`);
+
+  console.log(`[XandriaAI] Loaded config from ${configPath}`);
+  console.log(`[XandriaAI] Project: ${config.projectName}, version ${config.version}`);
 } catch (err) {
   console.error("[XandriaAI] Failed to load config.json:", err);
 }

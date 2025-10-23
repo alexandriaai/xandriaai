@@ -3,40 +3,60 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .request_handler import router as request_router
-
+from server.request_handler import router as request_router
 from dotenv import load_dotenv
 import json
 import os
 
-# Load .env automatically
-load_dotenv()
-
 # ---------------------------
-# Load config.json dynamically
+# ✅ Load .env from project root (one level up from /server/)
 # ---------------------------
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+
+if os.path.exists(ENV_PATH):
+    load_dotenv(ENV_PATH, override=True)
+    print(f"🔍 .env loaded from: {ENV_PATH}")
+else:
+    print(f"⚠️  .env file not found at expected path: {ENV_PATH}")
+
+# Explicitly print working directory for clarity
+print(f"📂 Current working directory: {os.getcwd()}")
+
+# ✅ Check and display whether the Gemini key was loaded
+gemini_key = os.getenv("GEMINI_API_KEY")
+if gemini_key:
+    print("🔑 GEMINI_API_KEY detected successfully.")
+else:
+    print("❌ GEMINI_API_KEY not found. Check your .env formatting and location.")
+
+# ---------------------------
+# ✅ Load config.json dynamically
+# ---------------------------
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+if os.path.exists(CONFIG_PATH):
+    with open(CONFIG_PATH, "r") as f:
+        CONFIG = json.load(f)
+else:
+    raise FileNotFoundError(f"❌ config.json not found at {CONFIG_PATH}")
 
-with open(CONFIG_PATH, "r") as f:
-    CONFIG = json.load(f)
-
+# ---------------------------
+# ✅ Initialize FastAPI app
+# ---------------------------
 app = FastAPI(title=f"{CONFIG['projectName']} Backend")
 
 # ---------------------------
-# CORS Configuration
+# ✅ Enable CORS for extension access
 # ---------------------------
-allowed_origins = ["*"]  # Later, you can replace this with CONFIG["frontend"]["allowedOrigins"] if added
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=["*"],  # Restrict later if needed
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ---------------------------
-# Root Endpoint
+# ✅ Root endpoint
 # ---------------------------
 @app.get("/")
 async def root():
@@ -47,12 +67,12 @@ async def root():
     }
 
 # ---------------------------
-# API Routes
+# ✅ API Routes
 # ---------------------------
 app.include_router(request_router, prefix="/api")
 
 # ---------------------------
-# Startup Log (Optional)
+# ✅ Startup log
 # ---------------------------
 @app.on_event("startup")
 async def startup_event():
