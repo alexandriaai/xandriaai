@@ -1,0 +1,228 @@
+:root {
+  --accent: #701A81;
+  --accent-hover: #8B2E99;
+  --bg: var(--vscode-editor-background);
+  --fg: var(--vscode-foreground);
+  --muted: var(--vscode-descriptionForeground);
+  --panel: var(--vscode-editorWidget-background);
+  --border: #701A81;
+  --input-bg: var(--vscode-input-background);
+  --input-fg: var(--vscode-input-foreground);
+  --btn-bg: #8B2E99;
+  --btn-hover: #A946B0;
+  --btn-fg: #ffffff;
+  --shadow: rgba(112, 26, 129, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 0 24px;
+  display: grid;
+  gap: 24px;
+}
+
+/* ---------- Header ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  padding-left: 0.5rem;
+}
+
+.logo {
+  width: 42px;
+  height: 42px;
+  margin-top: -2px;
+  filter: drop-shadow(0 0 4px rgba(112, 26, 129, 0.4));
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 8px rgba(112, 26, 129, 0.7));
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+
+.subtle {
+  margin-left: 0px;
+  color: var(--vscode-editor-foreground, #000000);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  box-shadow: 0 4px 16px var(--shadow);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--accent-hover);
+  box-shadow: 0 6px 20px rgba(112, 26, 129, 0.3);
+}
+
+/* ---------- Inputs ---------- */
+.field-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+textarea {
+  width: 100%;
+  min-height: 150px;
+  resize: vertical;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  padding: 12px;
+  background: var(--input-bg);
+  color: var(--input-fg);
+  font-family: monospace;
+  word-break: break-word;
+}
+
+
+
+
+textarea:focus {
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 10px rgba(112, 26, 129, 0.3);
+}
+
+/* ---------- Buttons ---------- */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn.primary {
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border-color: var(--accent);
+}
+
+.btn.primary:hover {
+  background: var(--btn-hover);
+  transform: translateY(-1px);
+}
+
+.btn:hover {
+  border-color: var(--accent-hover);
+}
+
+/* ---------- Output ---------- */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: none;
+  padding-bottom: 2px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.output {
+    width: 100%;
+    min-height: 100px;
+    resize: vertical;
+  margin: 0;
+  /* max-height: 360px; */
+  overflow: auto;
+  padding: 8px;
+  background: var(--input-bg);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--input-fg);
+  font-family: monospace;
+  margin-top: 4px;
+}
+
+.status {
+  color: var(--muted);
+  font-size: 12px;
+  min-height: 18px;
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.icon-btn:hover {
+  background: rgba(112, 26, 129, 0.1);
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
