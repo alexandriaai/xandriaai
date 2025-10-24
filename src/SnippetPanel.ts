@@ -13,30 +13,26 @@ export class SnippetPanel {
 
     const client = context ? new ApiClient(context) : undefined;
 
-    // Load HTML content into the Webview
+    // ✅ Load HTML content
     this._panel.webview.html = this.getHtml(this._panel.webview, this._extensionUri);
 
-    // Handle incoming messages from the Webview
+    // ✅ Handle incoming messages from webview
     this._panel.webview.onDidReceiveMessage(
       async (message) => {
         if (message.command === 'getSnippet') {
           try {
-            const editor = vscode.window.activeTextEditor;
-            const selection = editor ? editor.document.getText(editor.selection) : '';
-            const language = editor ? editor.document.languageId : 'plaintext';
+            const language = message.language || 'python';
+            const codeContext = message.codeContext || '';
 
-            if (!client) {
-              throw new Error('API client not available');
-            }
+            if (!client) throw new Error('API client not available.');
+            if (!codeContext.trim()) throw new Error('No code or prompt provided.');
 
-            const result = await client.getSuggestedSnippet({
-              language,
-              codeContext: selection || (editor ? editor.document.getText() : '')
-            });
+            // ✅ Request snippet from backend
+            const result = await client.getSuggestedSnippet({ language, codeContext });
 
             this._panel.webview.postMessage({
               command: 'displaySnippet',
-              snippet: result.snippet
+              snippet: result.snippet || '// No output received from backend.'
             });
           } catch (err: any) {
             const msg = err?.message ?? String(err);
@@ -46,19 +42,19 @@ export class SnippetPanel {
               snippet: `⚠️ ${msg}`
             });
           }
-        } 
-        
+        }
+
         else if (message.command === 'feedback') {
           vscode.window.showInformationMessage(`Thanks for your feedback: ${message.value}`);
-        } 
-        
+        }
+
         else if (message.type === 'formattedResponse') {
           this._panel.webview.postMessage({
             command: 'displayFormatted',
             payload: message.data
           });
-        } 
-        
+        }
+
         else if (message.type === 'insertSnippet' && message.text) {
           const editor = vscode.window.activeTextEditor;
           if (editor) {
@@ -71,7 +67,7 @@ export class SnippetPanel {
     );
   }
 
-  // Create or reveal existing panel
+  // ✅ Create or reveal panel
   public static createOrShow(extensionUri: vscode.Uri, context?: vscode.ExtensionContext) {
     const column = vscode.window.activeTextEditor?.viewColumn;
 
@@ -100,16 +96,14 @@ export class SnippetPanel {
     });
   }
 
-  // Post messages from extension.ts to the webview
   public postMessage(message: any) {
     this._panel.webview.postMessage(message);
   }
 
-  // Load HTML template for the Webview
+  // ✅ Updated HTML with working Generate button
   private getHtml(webview: vscode.Webview, extensionUri: vscode.Uri) {
     const media = vscode.Uri.joinPath(extensionUri, 'media');
     const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(media, 'styles.css'));
-    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(media, 'script.js'));
     const codiconsUri = webview.asWebviewUri(
       vscode.Uri.joinPath(extensionUri, 'node_modules', '@vscode', 'codicons', 'dist', 'codicon.css')
     );
@@ -118,7 +112,7 @@ export class SnippetPanel {
       default-src 'none';
       img-src ${webview.cspSource} data:;
       style-src ${webview.cspSource} 'unsafe-inline';
-      script-src ${webview.cspSource};
+      script-src ${webview.cspSource} 'unsafe-inline';
       font-src ${webview.cspSource};
     `;
 
@@ -135,13 +129,11 @@ export class SnippetPanel {
 </head>
 <body>
   <div class="container">
-  <header class="header">
-  <img src="${webview.asWebviewUri(vscode.Uri.joinPath(media, 'xandria_logo.png'))}" 
-       alt="XandriaAI Logo" class="logo" />
-  <h1>XandriaAI:</h1>
-  <p class="subtle">Your AI-powered code snippet generator</p>
-</header>
-
+    <header class="header">
+      <img src="${webview.asWebviewUri(vscode.Uri.joinPath(media, 'xandria_logo.png'))}" alt="XandriaAI Logo" class="logo" />
+      <h1>XandriaAI:</h1>
+      <p class="subtle">Your AI-powered code snippet generator</p>
+    </header>
 
     <section class="card">
       <label class="field-label" for="codeInput">Input Code</label>
@@ -167,11 +159,46 @@ export class SnippetPanel {
     </section>
   </div>
 
-  <div id="toast" class="toast" hidden>
-    <i class="codicon codicon-info"></i><span id="toastText"></span>
-  </div>
+  <script>
+    const vscode = acquireVsCodeApi();
 
-  <script src="${scriptUri}"></script>
+    document.getElementById("generate").addEventListener("click", () => {
+      const codeInput = document.getElementById("codeInput").value.trim();
+      const status = document.getElementById("status");
+      status.textContent = "⏳ Generating...";
+      vscode.postMessage({
+        command: "getSnippet",
+        language: "python", // can be dynamic later
+        codeContext: codeInput
+      });
+    });
+
+    document.getElementById("clear").addEventListener("click", () => {
+      document.getElementById("codeInput").value = "";
+      document.getElementById("output").textContent = "";
+    });
+
+    document.getElementById("copy").addEventListener("click", async () => {
+      const output = document.getElementById("output").textContent;
+      await navigator.clipboard.writeText(output);
+    });
+
+    document.getElementById("insert").addEventListener("click", () => {
+      const output = document.getElementById("output").textContent;
+      vscode.postMessage({ type: "insertSnippet", text: output });
+    });
+
+    window.addEventListener("message", (event) => {
+      const message = event.data;
+      const outputEl = document.getElementById("output");
+      const status = document.getElementById("status");
+
+      if (message.command === "displaySnippet") {
+        outputEl.textContent = message.snippet;
+        status.textContent = "✅ Done.";
+      }
+    });
+  </script>
 </body>
 </html>`;
   }

@@ -42,6 +42,30 @@
     }
   });
 
+// --- Feedback Button ---
+document.getElementById("sendFeedback").addEventListener("click", () => {
+  const feedbackBox = document.getElementById("feedbackInput");
+  const feedback = feedbackBox.value.trim();
+  const status = document.getElementById("status");
+
+  if (!feedback) {
+    showToast("⚠️ Please enter feedback before sending!");
+    return;
+  }
+
+  vscode.postMessage({
+    command: "feedback",
+    value: feedback
+  });
+
+  feedbackBox.value = "";
+  status.textContent = "💬 Feedback sent!";
+  showToast("✅ Feedback sent. Thank you!");
+});
+
+
+
+
   // --- Insert Snippet to Editor ---
   $("#insert").addEventListener("click", () => {
     const snippetText = output.textContent?.trim();
