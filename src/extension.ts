@@ -6,20 +6,18 @@ import { formatResponse } from './ResponseFormatter';
 import { registerInlineProvider } from './inlineProvider';
 import * as fs from "fs";
 import * as path from "path";
-console.log("🟣 XandriaAI Extension Booting — Debug Logging Enabled");
+import fetch from "node-fetch"; // ✅ needed for direct backend call
 
+console.log("🟣 XandriaAI Extension Booting — Debug Logging Enabled");
 
 let config: any;
 
 try {
-  // look both in out/.. and directly in extension root
   const rootPath = path.join(__dirname, "..", "config.json");
   const fallbackPath = path.join(__dirname, "../..", "config.json");
-
   const configPath = fs.existsSync(rootPath) ? rootPath : fallbackPath;
   const rawData = fs.readFileSync(configPath, "utf-8");
   config = JSON.parse(rawData);
-
   console.log(`[XandriaAI] Loaded config from ${configPath}`);
   console.log(`[XandriaAI] Project: ${config.projectName}, version ${config.version}`);
 } catch (err) {
@@ -46,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // ---------------------
-  // Display config-based message (optional)
+  // Display config-based message
   // ---------------------
   if (config && config.frontend?.showLogs) {
     vscode.window.showInformationMessage(
@@ -74,7 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // ---------------------
-  // Run code analysis (3.1 AST Parser)
+  // Run code analysis (existing)
   // ---------------------
   context.subscriptions.push(
     vscode.commands.registerCommand('xandriaai.testAnalyze', async () => {
@@ -106,7 +104,55 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // ---------------------
-  // Format and Send (2.3 Response Formatter)
+  // NEW: Test Snippet Generator (calls FastAPI backend)
+  // ---------------------
+  context.subscriptions.push(
+    vscode.commands.registerCommand('xandriaai.testSnippet', async () => {
+      console.log("🚀 Command triggered: xandriaai.testSnippet");
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showErrorMessage("No active editor. Open a file first.");
+        return;
+      }
+
+      const selection = editor.selection;
+      const codeContext = editor.document.getText(selection) || editor.document.getText();
+      const language = editor.document.languageId;
+
+      const payload = { language, codeContext };
+      console.log("📤 Sending to backend:", payload);
+
+      try {
+        const response = await fetch("http://127.0.0.1:8001/api/snippet", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Backend returned ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("📥 Received from backend:", data);
+
+        const snippet = data?.snippet || "// No snippet returned";
+        const doc = await vscode.workspace.openTextDocument({
+          content: snippet,
+          language,
+        });
+        await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
+
+        vscode.window.showInformationMessage("✅ Gemini snippet generated successfully!");
+      } catch (err: any) {
+        console.error("❌ Snippet generation failed:", err);
+        vscode.window.showErrorMessage(`Snippet generation failed: ${err.message}`);
+      }
+    })
+  );
+
+  // ---------------------
+  // Format and Send (existing)
   // ---------------------
   context.subscriptions.push(
     vscode.commands.registerCommand('xandriaai.formatAndSend', () => {
@@ -130,7 +176,7 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  console.log("✅ All commands registered: showPanel, setApiToken, testAnalyze, formatAndSend");
+  console.log("✅ All commands registered: showPanel, setApiToken, testAnalyze, formatAndSend, testSnippet");
 
   // ---------------------
   // Register feedback button

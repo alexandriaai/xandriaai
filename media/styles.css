@@ -226,3 +226,15 @@ textarea:focus {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
+#feedbackInput {
+  width: 100%;
+  min-height: 60px;
+  resize: vertical;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  padding: 10px;
+  background: var(--input-bg);
+  color: var(--input-fg);
+  font-family: var(--vscode-editor-font-family, monospace);
+  margin-bottom: 8px;
+}
