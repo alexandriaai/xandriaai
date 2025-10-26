@@ -9,8 +9,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
 
-
-
 // ✅ Load environment variables from project root
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
@@ -130,19 +128,19 @@ export class ApiClient {
     }
   }
 
-  // ✅ AI Snippet generation endpoint
+  // ✅ AI Snippet generation endpoint (no /api prefix)
   async getSuggestedSnippet(payload: { language: string; codeContext: string }): Promise<{ snippet: string }> {
     return this.request<{ snippet: string }>({
-      path: '/api/snippet',
+      path: '/snippet',
       method: 'POST',
       body: payload,
     });
   }
 
-  // ✅ AST / static analysis endpoint
+  // ✅ AST / static analysis endpoint (no /api prefix)
   async analyzeCode(payload: { code: string; languageId: string; fileName: string }): Promise<any> {
     return this.request<any>({
-      path: '/api/analyze',
+      path: '/analyze',
       method: 'POST',
       body: payload,
     });
