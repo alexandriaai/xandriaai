@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from request_handler import handle_request
+from backend.request_handler import handle_request
 
 app = FastAPI()
 
