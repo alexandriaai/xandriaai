@@ -1,67 +1,99 @@
 # xandriaai README
 
-This is the README for your extension "xandriaai". After writing up a brief description, we recommend including the following sections.
+XandriaAI is an AI-powered code snippet generator for VS Code.  
+It analyzes your code and provides context-aware improvements using the Gemini API.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Generate and optimize code snippets.
+- Inline suggestions and documentation lookup.
+- Secure backend hosted on Render.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+To use XandriaAI in Visual Studio Code, you’ll need:
+
+- **Visual Studio Code** version 1.80.0 or later  
+- **An active internet connection** (for cloud-based AI suggestions) 
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
+XandriaAI includes a few optional settings you can customize from  
+**File → Preferences → Settings → Extensions → XandriaAI**.
 
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+* `xandriaai.enable`: Enable or disable XandriaAI suggestions globally.  
+* `xandriaai.theme`: Choose between `"dark"` and `"light"` themes for the suggestion panel.  
+* `xandriaai.showLogs`: Show or hide diagnostic logs in the VS Code console.  
+* `xandriaai.languageSupport`: Specify which programming languages XandriaAI will analyze  
+  (e.g., `"python"`, `"typescript"`, `"javascript"`).
+
+By default, XandriaAI is enabled with dark theme and supports Python and TypeScript.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- The first AI response may take a few seconds if the backend server is waking from idle on Render’s free tier.  
+- Occasionally, long code inputs may cause delayed or incomplete AI suggestions.  
+- Switching VS Code themes while the XandriaAI panel is open can cause minor visual misalignment.  
+- Internet connection loss will prevent snippet generation until reconnected.  
+
+We’re actively improving performance and stability in upcoming releases.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+1.0.0
+Initial public release of **XandriaAI**.  
+- Added AI-powered code snippet generation using the Gemini API.  
+- Introduced the Snippet Panel with input/output views.  
+- Enabled secure backend hosting on Render for independent operation.
+
+1.1.0
+- Added feedback and inline suggestion features.  
+- Improved UI responsiveness and theme support.  
+- Enhanced backend stability and startup performance.
+
+1.2.0
+- Optimized API request handling for faster responses.  
+- Minor UI refinements and bug fixes.
 
 ### 1.0.0
 
-Initial release of ...
+Initial public release of **XandriaAI**.  
+- Added AI-powered code snippet generation using the Gemini API.  
+- Introduced the Snippet Panel with input/output views.  
+- Enabled secure backend hosting on Render for independent operation.
 
-### 1.0.1
+### 1.0.0
 
 Fixed issue #.
 
 ### 1.1.0
 
-Added features X, Y, and Z.
+ Added feedback and inline suggestion features.  
+- Improved UI responsiveness and theme support.  
+- Enhanced backend stability and startup performance.
+
 
 ---
 
 ## Following extension guidelines
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+XandriaAI was built in accordance with Visual Studio Code’s official
 
 * [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+The extension follows best practices for:
+- Non-blocking, responsive UI design  
+- Secure API communication with the backend  
+- Consistent VS Code theming and accessibility support
 
 ## Working with Markdown
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+This section is primarily for reference.
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+XandriaAI’s documentation and release notes are written in Markdown format,  
+which allows clear formatting and easy updates.  
+If you wish to contribute to documentation, you can edit Markdown files directly in Visual Studio Code and preview your changes using `Ctrl+Shift+V`.
 
 ## For more information
 
