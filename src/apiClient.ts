@@ -1,6 +1,6 @@
 // Ricky Morival 1.4 Section + Alexandra Sanzare 3.1 Section
-// ✅ Final Production Version – Permanent Fix
-// Auto-loads Gemini key from .env and removes manual token setup requirement
+// ✅ Local Testing Version – Safe Fix
+// Auto-loads Gemini key from .env and connects to your local FastAPI backend
 // Includes detailed debugging for fetch errors
 /* eslint-disable no-console */
 import * as vscode from 'vscode';
@@ -26,11 +26,11 @@ export class ApiClient {
   constructor(private readonly context: vscode.ExtensionContext) {}
 
   private get config() {
-    const cfg = vscode.workspace.getConfiguration('xandriaai');
     return {
-      baseUrl: String(cfg.get('serverBaseUrl') || 'http://127.0.0.1:8000'),
-      allowInsecure: Boolean(cfg.get('allowInsecureTls') || false),
-      timeoutMs: Number(cfg.get('requestTimeoutMs') || 10000),
+      // ✅ Local backend endpoint for testing
+      baseUrl: 'http://127.0.0.1:8001',
+      allowInsecure: false,
+      timeoutMs: 10000,
     };
   }
 
@@ -77,12 +77,11 @@ export class ApiClient {
         console.log('   ➤ Token present:', !!token);
       }
 
-      // ✅ Added "mode: 'cors'" for VS Code webview HTTPS compatibility
       const res = await fetch(endpoint, {
         method,
         headers,
         body: body ? JSON.stringify(body) : undefined,
-        mode: 'cors', // <--- crucial addition
+        mode: 'cors',
         signal: finalSignal,
         // @ts-ignore
         agent: allowInsecure ? new https.Agent({ rejectUnauthorized: false }) : undefined,
@@ -107,7 +106,6 @@ export class ApiClient {
 
       return data as T;
     } catch (err: any) {
-      // ✅ Full debug log for troubleshooting
       console.error('❌ [XandriaAI Fetch Error]');
       console.error('   ➤ Endpoint:', endpoint);
       console.error('   ➤ Method:', method);
@@ -115,7 +113,6 @@ export class ApiClient {
       console.error('   ➤ Error message:', err?.message || err);
       console.error('   ➤ Stack:', err?.stack);
 
-      // User-facing error messages
       if (err?.name === 'AbortError') {
         vscode.window.showErrorMessage(
           '⏳ Request timed out. Increase xandriaai.requestTimeoutMs in settings or try again.'
@@ -130,16 +127,16 @@ export class ApiClient {
     }
   }
 
-  // ✅ AI Snippet generation endpoint (no /api prefix)
+  // ✅ AI Snippet generation endpoint (mapped to FastAPI /process)
   async getSuggestedSnippet(payload: { language: string; codeContext: string }): Promise<{ snippet: string }> {
     return this.request<{ snippet: string }>({
-      path: '/snippet',
+      path: '/process',   // <-- updated to match your FastAPI route
       method: 'POST',
       body: payload,
     });
   }
 
-  // ✅ AST / static analysis endpoint (no /api prefix)
+  // ✅ AST / static analysis endpoint (kept as-is)
   async analyzeCode(payload: { code: string; languageId: string; fileName: string }): Promise<any> {
     return this.request<any>({
       path: '/analyze',

@@ -62,7 +62,22 @@ async def security_bandit():
     if not report.get("ok"):
         raise HTTPException(status_code=500, detail=report.get("error", "Bandit failed"))
     return report
+
+
+# ----- Main Entry for /process -----
 def handle_request(request: dict):
-    """Entry point used by main.py for Render."""
-    # You can just call one of your route functions directly or return a simple message
-    return {"message": "Backend handler active", "received": request}
+    """Entry point used by main.py for local and Render testing."""
+    try:
+        # Extract input data
+        language = request.get("language", "python")
+        code_context = request.get("codeContext", "")
+
+        # Generate snippet using Gemini model
+        snippet_text = suggest_snippet_with_gemini(language, code_context)
+
+        # Return valid JSON response for frontend
+        return {"snippet": snippet_text}
+
+    except Exception as e:
+        # Return error safely to frontend if something fails
+        return {"error": f"Snippet generation failed: {str(e)}"}
