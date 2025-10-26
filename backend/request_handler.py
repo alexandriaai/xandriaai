@@ -62,3 +62,7 @@ async def security_bandit():
     if not report.get("ok"):
         raise HTTPException(status_code=500, detail=report.get("error", "Bandit failed"))
     return report
+def handle_request(request: dict):
+    """Entry point used by main.py for Render."""
+    # You can just call one of your route functions directly or return a simple message
+    return {"message": "Backend handler active", "received": request}
