@@ -77,13 +77,15 @@ export class ApiClient {
         console.log('   ➤ Token present:', !!token);
       }
 
+      // ✅ Added "mode: 'cors'" for VS Code webview HTTPS compatibility
       const res = await fetch(endpoint, {
         method,
         headers,
         body: body ? JSON.stringify(body) : undefined,
+        mode: 'cors', // <--- crucial addition
+        signal: finalSignal,
         // @ts-ignore
         agent: allowInsecure ? new https.Agent({ rejectUnauthorized: false }) : undefined,
-        signal: finalSignal,
       });
 
       if (!res.ok) {
