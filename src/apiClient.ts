@@ -1,5 +1,5 @@
 // Ricky Morival 1.4 Section + Alexandra Sanzare 3.1 Section
-// ✅ Local Testing Version – Safe Fix
+// ✅ Local Testing Version – Stable Fix
 // Auto-loads Gemini key from .env and connects to your local FastAPI backend
 // Includes detailed debugging for fetch errors
 /* eslint-disable no-console */
@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as dotenv from 'dotenv';
 
 // ✅ Load environment variables from project root
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export type RequestOptions = {
   path: string;
@@ -26,26 +26,21 @@ export class ApiClient {
   constructor(private readonly context: vscode.ExtensionContext) {}
 
   private get config() {
-  // ✅ Always use Render first unless explicitly testing locally
-  const isRender = true; // Force production as default
-  const baseUrl = isRender
-    ? "https://xandriaai.onrender.com" // Render backend
-    : "http://127.0.0.1:8001";          // Local fallback (only if manually toggled)
-
-  return {
-    baseUrl,
-    allowInsecure: false,
-    timeoutMs: 10000,
-  };
-}
+    return {
+      // ✅ Local backend for testing
+      baseUrl: 'http://127.0.0.1:8001',
+      allowInsecure: true,
+      timeoutMs: 10000,
+    };
+  }
 
   async request<T = any>({ path, method = 'GET', body, signal }: RequestOptions): Promise<T> {
     const { baseUrl, allowInsecure, timeoutMs } = this.config;
 
-    // ✅ Load token from VS Code secrets or fallback to .env GEMINI_API_KEY
+    // ✅ Load token from VS Code secrets or fallback to .env GOOGLE_API_KEY
     let token = await this.context.secrets.get('xandriaai.apiToken');
     if (!token || token.trim() === '') {
-      token = process.env.GEMINI_API_KEY || '';
+      token = process.env.GOOGLE_API_KEY || '';
     }
 
     if (!token) {
@@ -119,9 +114,7 @@ export class ApiClient {
       console.error('   ➤ Stack:', err?.stack);
 
       if (err?.name === 'AbortError') {
-        vscode.window.showErrorMessage(
-          '⏳ Request timed out. Increase xandriaai.requestTimeoutMs in settings or try again.'
-        );
+        vscode.window.showErrorMessage('⏳ Request timed out. Try again.');
         throw new Error('Request timed out.');
       }
 
@@ -132,21 +125,21 @@ export class ApiClient {
     }
   }
 
-  // ✅ AI Snippet generation endpoint (mapped to FastAPI /process)
-  async getSuggestedSnippet(payload: { language: string; codeContext: string }): Promise<{ snippet: string }> {
-    return this.request<{ snippet: string }>({
-      path: '/process',   // <-- updated to match your FastAPI route
-      method: 'POST',
-      body: payload,
-    });
-  }
+  // ✅ AI Snippet generation endpoint
+async getSuggestedSnippet(payload: { language: string; codeContext: string }): Promise<{ snippet: string }> {
+  return this.request<{ snippet: string }>({
+    path: '/process',
+    method: 'POST',
+    body: payload,
+  });
+}
 
-  // ✅ AST / static analysis endpoint (kept as-is)
-  async analyzeCode(payload: { code: string; languageId: string; fileName: string }): Promise<any> {
-    return this.request<any>({
-      path: '/analyze',
-      method: 'POST',
-      body: payload,
-    });
-  }
+// ✅ AST / static analysis endpoint
+async analyzeCode(payload: { code: string; languageId: string; fileName: string }): Promise<any> {
+  return this.request<any>({
+    path: '/analyze',
+    method: 'POST',
+    body: payload,
+  });
+}
 }
