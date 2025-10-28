@@ -26,18 +26,18 @@ export class ApiClient {
   constructor(private readonly context: vscode.ExtensionContext) {}
 
   private get config() {
-    // ✅ Automatically toggle between local and Render backend
-    const isLocal = window.location.hostname === "localhost";
-    const baseUrl = isLocal
-      ? "http://127.0.0.1:8001"
-      : "https://xandriaai.onrender.com"; // Render URL (no port)
+  // ✅ Always use Render first unless explicitly testing locally
+  const isRender = true; // Force production as default
+  const baseUrl = isRender
+    ? "https://xandriaai.onrender.com" // Render backend
+    : "http://127.0.0.1:8001";          // Local fallback (only if manually toggled)
 
-    return {
-      baseUrl,
-      allowInsecure: false,
-      timeoutMs: 10000,
-    };
-  }
+  return {
+    baseUrl,
+    allowInsecure: false,
+    timeoutMs: 10000,
+  };
+}
 
   async request<T = any>({ path, method = 'GET', body, signal }: RequestOptions): Promise<T> {
     const { baseUrl, allowInsecure, timeoutMs } = this.config;
