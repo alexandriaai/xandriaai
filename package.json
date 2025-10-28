@@ -3,7 +3,7 @@
   "displayName": "XandriaAI",
   "description": "AI-Powered Coding Assistant that suggests code snippets.",
   "version": "0.0.1",
-  "publisher": "your-name-or-org",
+  "publisher": "Randolphpierre",
   "engines": {
     "vscode": "^1.103.0"
   },
