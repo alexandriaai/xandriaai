@@ -26,9 +26,14 @@ export class ApiClient {
   constructor(private readonly context: vscode.ExtensionContext) {}
 
   private get config() {
+    // ✅ Automatically toggle between local and Render backend
+    const isLocal = window.location.hostname === "localhost";
+    const baseUrl = isLocal
+      ? "http://127.0.0.1:8001"
+      : "https://xandriaai.onrender.com"; // Render URL (no port)
+
     return {
-      // ✅ Local backend endpoint for testing
-      baseUrl: 'http://127.0.0.1:8001',
+      baseUrl,
       allowInsecure: false,
       timeoutMs: 10000,
     };
