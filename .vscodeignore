@@ -1,13 +1,38 @@
+# VS Code & build artifacts
 .vscode/**
 .vscode-test/**
-src/**
-.gitignore
-.yarnrc
-vsc-extension-quickstart.md
 **/tsconfig.json
 **/eslint.config.mjs
 **/*.map
 **/*.ts
 **/.vscode-test.*
+
+# Python virtual environment
+venv/**
+__pycache__/
+*.pyc
+*.pyo
+
+# Node modules & test coverage
+node_modules/**
+coverage/**
+.scannerwork/**
+.yarnrc
+.gitignore
+**/jest.config.js
+**/sonar-project.properties
+
+# Certificates, logs, temp files
 server/cert/**
-.env
+*.log
+*.tmp
+*.env
+
+# Documentation & misc
+vsc-extension-quickstart.md
+**/*.md
+README.md
+CHANGELOG.md
+
+# Don’t include previously built packages
+*.vsix

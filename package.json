@@ -7,9 +7,18 @@
   "engines": {
     "vscode": "^1.103.0"
   },
+  "icon": "xandria_logo.png",
   "categories": [
     "Other"
   ],
+
+"repository": {
+  "type": "git",
+  "url": "https://github.com/alexandriaai/xandriaai.git"
+},
+
+
+
   "activationEvents": [
     "*",
     "onCommand:xandriaai.showPanel",

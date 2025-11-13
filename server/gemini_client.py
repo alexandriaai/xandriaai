@@ -19,16 +19,16 @@ else:
 # ✅ Read Gemini API key and model info
 # ---------------------------
 API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-MODEL = os.getenv("XANDRIAAI_GEMINI_MODEL", "models/gemini-2.0-flash")
+MODEL = os.getenv("XANDRIAAI_GEMINI_MODEL", "gemini-2.5-flash")  # no "models/" prefix
 
 # Automatically choose the correct API version based on the model family
-if MODEL.startswith("models/gemini-2"):
+if MODEL.startswith("gemini-2"):
     API_VERSION = "v1"
 else:
     API_VERSION = "v1beta"
 
 ENDPOINT = f"https://generativelanguage.googleapis.com/{API_VERSION}/models/{MODEL}:generateContent"
-
+print(f"[Gemini Client] Using endpoint: {ENDPOINT}")
 
 if API_KEY:
     print("[Gemini Client] 🔑 API key loaded successfully.")
@@ -98,11 +98,8 @@ def suggest_snippet_with_gemini(language: str, code_context: str) -> str:
             return f"// Gemini error {resp.status_code}: {resp.text}"
 
         data = resp.json()
-
-        # ✅ Print a short preview of Gemini's raw response for debugging
         print("[Gemini] Raw preview:", json.dumps(data, indent=2)[:200], "...")
 
-        # ✅ Safely extract text from Gemini 2.x response
         try:
             text = (
                 data["candidates"][0]["content"]["parts"][0].get("text")
