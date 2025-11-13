@@ -3,7 +3,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from server.request_handler import router as request_router
+from backend.request_handler import router as request_router
 from dotenv import load_dotenv
 import json
 import os

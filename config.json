@@ -2,11 +2,12 @@
   "projectName": "XandriaAI",
   "version": "1.0.0",
 
- "backend": {
-  "url": "https://xandriaai.onrender.com",
-  "port": 443,
-  "reload": false
-},
+  "backend": {
+    "uri": "https://xandriaai.onrender.com",   
+    "url": "https://xandriaai.onrender.com",
+    "port": 443,
+    "reload": false
+  },
 
   "frontend": {
     "theme": "dark",

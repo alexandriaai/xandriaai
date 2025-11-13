@@ -167,7 +167,8 @@ export function activate(context: vscode.ExtensionContext) {
       const formatted = formatResponse(rawResults);
       console.log("📦 Formatted JSON:", formatted);
 
-      SnippetPanel.currentPanel?.postMessage({
+      (SnippetPanel.currentPanel as any)?.postMessage({
+
         type: 'formattedResponse',
         data: formatted
       });

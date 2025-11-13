@@ -1,63 +1,43 @@
 // Ricky Morival 1.4 Section + Alexandra Sanzare 3.1 Section
-// ✅ Local Testing Version – Stable Fix
-// Auto-loads Gemini key from .env and connects to your local FastAPI backend
-// Includes detailed debugging for fetch errors
-/* eslint-disable no-console */
-import * as vscode from 'vscode';
-import * as https from 'https';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as dotenv from 'dotenv';
+// ✅ Production-Safe Version – November 2025
+// Routes all traffic through your FastAPI backend only.
+// No Gemini API key is ever loaded or sent from the frontend.
 
-// ✅ Load environment variables from project root
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+/* eslint-disable no-console */
+import * as vscode from "vscode";
+import * as https from "https";
 
 export type RequestOptions = {
   path: string;
-  method?: 'GET' | 'POST';
+  method?: "GET" | "POST";
   body?: any;
   signal?: AbortSignal;
 };
 
-// ✅ Toggle this to enable/disable console debug logs
+// ✅ Toggle this to show/hide console debug logs
 const DEBUG = true;
 
 export class ApiClient {
   constructor(private readonly context: vscode.ExtensionContext) {}
 
+  // ✅ Determines whether we’re using Render (production) or local FastAPI (dev)
   private get config() {
-  // ✅ Toggle between Render (production) and Localhost (testing)
-  const isRender = !vscode.env.remoteName; 
-  // Above logic:
-  // - When running inside VS Code extension (real use) → Render
-  // - When running locally from dev environment → Localhost
+    const isRender = !vscode.env.remoteName;
 
-  const baseUrl = isRender
-    ? "https://xandriaai.onrender.com" // Render backend
-    : "http://127.0.0.1:8001";         // Local backend
+    const baseUrl = isRender
+      ? "https://xandriaai.onrender.com" // Hosted backend (Render)
+      : "http://127.0.0.1:8001";         // Local backend
 
-  return {
-    baseUrl,
-    allowInsecure: !isRender,
-    timeoutMs: 10000,
-  };
-}
+    return {
+      baseUrl,
+      allowInsecure: !isRender,
+      timeoutMs: 10000,
+    };
+  }
 
-  async request<T = any>({ path, method = 'GET', body, signal }: RequestOptions): Promise<T> {
+  // ✅ Generic request wrapper – all backend calls go through this
+  async request<T = any>({ path, method = "GET", body, signal }: RequestOptions): Promise<T> {
     const { baseUrl, allowInsecure, timeoutMs } = this.config;
-
-    // ✅ Load token from VS Code secrets or fallback to .env GOOGLE_API_KEY
-    let token = await this.context.secrets.get('xandriaai.apiToken');
-    if (!token || token.trim() === '') {
-      token = process.env.GOOGLE_API_KEY || '';
-    }
-
-    if (!token) {
-      vscode.window.showErrorMessage(
-        '❌ Missing Gemini API key. Add it to your .env or set via “XandriaAI: Set API Token”.'
-      );
-      throw new Error('Missing Gemini API key');
-    }
 
     let controller: AbortController | undefined;
     let timeout: NodeJS.Timeout | undefined;
@@ -69,28 +49,27 @@ export class ApiClient {
       finalSignal = controller.signal;
     }
 
+    // ✅ Backend handles authentication and API key internally
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
     };
 
     const endpoint = new URL(path, baseUrl).toString();
 
     try {
       if (DEBUG) {
-        console.log('🚀 [XandriaAI Request Started]');
-        console.log('   ➤ Endpoint:', endpoint);
-        console.log('   ➤ Method:', method);
-        console.log('   ➤ Body:', body ? JSON.stringify(body) : '(none)');
-        console.log('   ➤ Token present:', !!token);
+        console.log("🚀 [XandriaAI Request Started]");
+        console.log("   ➤ Endpoint:", endpoint);
+        console.log("   ➤ Method:", method);
+        console.log("   ➤ Body:", body ? JSON.stringify(body) : "(none)");
       }
 
       const res = await fetch(endpoint, {
         method,
         headers,
         body: body ? JSON.stringify(body) : undefined,
-        mode: 'cors',
+        mode: "cors",
         signal: finalSignal,
         // @ts-ignore
         agent: allowInsecure ? new https.Agent({ rejectUnauthorized: false }) : undefined,
@@ -98,35 +77,27 @@ export class ApiClient {
 
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(`HTTP ${res.status} ${res.statusText}: ${text || 'No response body'}`);
+        throw new Error(`HTTP ${res.status} ${res.statusText}: ${text || "No response body"}`);
       }
 
-      const contentType = res.headers.get('content-type') || '';
-      const data = contentType.includes('application/json')
+      const contentType = res.headers.get("content-type") || "";
+      const data = contentType.includes("application/json")
         ? await res.json()
         : await res.text();
 
       if (DEBUG) {
-        console.log('✅ [XandriaAI Response OK]');
-        console.log('   ➤ Status:', res.status);
-        console.log('   ➤ Type:', contentType);
-        console.log('   ➤ Data:', data);
+        console.log("✅ [XandriaAI Response OK]");
+        console.log("   ➤ Status:", res.status);
+        console.log("   ➤ Type:", contentType);
+        console.log("   ➤ Data:", data);
       }
 
       return data as T;
     } catch (err: any) {
-      console.error('❌ [XandriaAI Fetch Error]');
-      console.error('   ➤ Endpoint:', endpoint);
-      console.error('   ➤ Method:', method);
-      console.error('   ➤ Error name:', err?.name);
-      console.error('   ➤ Error message:', err?.message || err);
-      console.error('   ➤ Stack:', err?.stack);
-
-      if (err?.name === 'AbortError') {
-        vscode.window.showErrorMessage('⏳ Request timed out. Try again.');
-        throw new Error('Request timed out.');
-      }
-
+      console.error("❌ [XandriaAI Fetch Error]");
+      console.error("   ➤ Endpoint:", endpoint);
+      console.error("   ➤ Method:", method);
+      console.error("   ➤ Error:", err);
       vscode.window.showErrorMessage(`⚠️ Request failed: ${err.message || err}`);
       throw err;
     } finally {
@@ -134,21 +105,21 @@ export class ApiClient {
     }
   }
 
-  // ✅ AI Snippet generation endpoint
-async getSuggestedSnippet(payload: { language: string; codeContext: string }): Promise<{ snippet: string }> {
-  return this.request<{ snippet: string }>({
-    path: '/process',
-    method: 'POST',
-    body: payload,
-  });
-}
+  // ✅ Snippet generation endpoint
+  async getSuggestedSnippet(payload: { language: string; codeContext: string }): Promise<{ snippet: string }> {
+    return this.request<{ snippet: string }>({
+      path: "/process",
+      method: "POST",
+      body: payload,
+    });
+  }
 
-// ✅ AST / static analysis endpoint
-async analyzeCode(payload: { code: string; languageId: string; fileName: string }): Promise<any> {
-  return this.request<any>({
-    path: '/analyze',
-    method: 'POST',
-    body: payload,
-  });
-}
+  // ✅ Static analysis endpoint
+  async analyzeCode(payload: { code: string; languageId: string; fileName: string }): Promise<any> {
+    return this.request<any>({
+      path: "/analyze",
+      method: "POST",
+      body: payload,
+    });
+  }
 }

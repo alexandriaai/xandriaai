@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
-import { ApiClient } from './apiClient';
+import * as vscode from "vscode";
+import { ApiClient } from "./apiClient";
 
 export class SnippetPanel {
   public static currentPanel: SnippetPanel | undefined;
@@ -12,50 +12,39 @@ export class SnippetPanel {
     this._extensionUri = extensionUri;
 
     const client = context ? new ApiClient(context) : undefined;
-
-    // ✅ Load HTML content
     this._panel.webview.html = this.getHtml(this._panel.webview, this._extensionUri);
 
-    // ✅ Handle incoming messages from webview
     this._panel.webview.onDidReceiveMessage(
       async (message) => {
-        if (message.command === 'getSnippet') {
+        if (message.command === "getSnippet") {
           try {
-            const language = message.language || 'python';
-            const codeContext = message.codeContext || '';
+            const language = message.language || "python";
+            const codeContext = message.codeContext || "";
 
-            if (!client) throw new Error('API client not available.');
-            if (!codeContext.trim()) throw new Error('No code or prompt provided.');
+            if (!client) throw new Error("API client not available.");
+            if (!codeContext.trim()) throw new Error("No code or prompt provided.");
 
-            // ✅ Request snippet from backend
             const result = await client.getSuggestedSnippet({ language, codeContext });
 
             this._panel.webview.postMessage({
-              command: 'displaySnippet',
-              snippet: result.snippet || '// No output received from backend.'
+              command: "displaySnippet",
+              snippet: result.snippet || "// No output received from backend.",
             });
           } catch (err: any) {
             const msg = err?.message ?? String(err);
             vscode.window.showErrorMessage(`XandriaAI: ${msg}`);
             this._panel.webview.postMessage({
-              command: 'displaySnippet',
-              snippet: `⚠️ ${msg}`
+              command: "displaySnippet",
+              snippet: `⚠️ ${msg}`,
             });
           }
         }
 
-        else if (message.command === 'feedback') {
+        else if (message.command === "feedback") {
           vscode.window.showInformationMessage(`Thanks for your feedback: ${message.value}`);
         }
 
-        else if (message.type === 'formattedResponse') {
-          this._panel.webview.postMessage({
-            command: 'displayFormatted',
-            payload: message.data
-          });
-        }
-
-        else if (message.type === 'insertSnippet' && message.text) {
+        else if (message.type === "insertSnippet" && message.text) {
           const editor = vscode.window.activeTextEditor;
           if (editor) {
             await editor.insertSnippet(new vscode.SnippetString(message.text), editor.selection.start);
@@ -67,7 +56,6 @@ export class SnippetPanel {
     );
   }
 
-  // ✅ Create or reveal panel
   public static createOrShow(extensionUri: vscode.Uri, context?: vscode.ExtensionContext) {
     const column = vscode.window.activeTextEditor?.viewColumn;
 
@@ -77,35 +65,27 @@ export class SnippetPanel {
     }
 
     const panel = vscode.window.createWebviewPanel(
-      'snippetPanel',
-      'Xandria AI',
+      "snippetPanel",
+      "Xandria AI",
       vscode.ViewColumn.One,
       {
         enableScripts: true,
         localResourceRoots: [
-          vscode.Uri.joinPath(extensionUri, 'media'),
-          vscode.Uri.joinPath(extensionUri, 'node_modules', '@vscode', 'codicons', 'dist')
-        ]
+          vscode.Uri.joinPath(extensionUri, "media"),
+          vscode.Uri.joinPath(extensionUri, "node_modules", "@vscode", "codicons", "dist"),
+        ],
       }
     );
 
     SnippetPanel.currentPanel = new SnippetPanel(panel, extensionUri, context);
-
-    panel.onDidDispose(() => {
-      SnippetPanel.currentPanel = undefined;
-    });
+    panel.onDidDispose(() => (SnippetPanel.currentPanel = undefined));
   }
 
-  public postMessage(message: any) {
-    this._panel.webview.postMessage(message);
-  }
-
-  // ✅ Updated HTML with working Generate button
   private getHtml(webview: vscode.Webview, extensionUri: vscode.Uri) {
-    const media = vscode.Uri.joinPath(extensionUri, 'media');
-    const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(media, 'styles.css'));
+    const media = vscode.Uri.joinPath(extensionUri, "media");
+    const stylesUri = webview.asWebviewUri(vscode.Uri.joinPath(media, "styles.css"));
     const codiconsUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(extensionUri, 'node_modules', '@vscode', 'codicons', 'dist', 'codicon.css')
+      vscode.Uri.joinPath(extensionUri, "node_modules", "@vscode", "codicons", "dist", "codicon.css")
     );
 
     const csp = `
@@ -125,12 +105,12 @@ export class SnippetPanel {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="${codiconsUri}" rel="stylesheet">
   <link href="${stylesUri}" rel="stylesheet">
-  <title>Xandria AI: – Code Snippet Generator</title>
+  <title>Xandria AI – Code Snippet Generator</title>
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <img src="${webview.asWebviewUri(vscode.Uri.joinPath(media, 'xandria_logo.png'))}" alt="XandriaAI Logo" class="logo" />
+      <img src="${webview.asWebviewUri(vscode.Uri.joinPath(media, "xandria_logo.png"))}" alt="XandriaAI Logo" class="logo" />
       <h1>XandriaAI:</h1>
       <p class="subtle">Your AI-powered code snippet generator</p>
     </header>
@@ -168,8 +148,8 @@ export class SnippetPanel {
       status.textContent = "⏳ Generating...";
       vscode.postMessage({
         command: "getSnippet",
-        language: "python", // can be dynamic later
-        codeContext: codeInput
+        language: "python",
+        codeContext: codeInput,
       });
     });
 
