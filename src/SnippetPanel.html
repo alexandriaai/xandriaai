@@ -4,106 +4,149 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Xandria AI</title>
+ <link rel="stylesheet" href="./styles.css" />
   <style>
+    /* fallback if CSS file fails to load */
     body {
-      font-family: sans-serif;
-      padding: 1rem;
-      background-color: #1e1e1e;
-      color: #ffffff;
-    }
-
-    #snippetBox {
-      width: 100%;
-      min-height: 150px;
-      background: #333;
-      padding: 10px;
-      border: 1px solid #555;
-      border-radius: 4px;
-      color: white;
-      white-space: pre-wrap;
-      margin-top: 1rem;
-    }
-
-    textarea {
-      width: 100%;
-      height: 100px;
-      padding: 10px;
-      background-color: #2d2d2d;
-      color: white;
-      border: 1px solid #555;
-      border-radius: 4px;
-    }
-
-    button {
-      margin-top: 1rem;
-      padding: 0.5rem 1rem;
-      background-color: #007acc;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #005f99;
-    }
-
-    .feedback-buttons {
-      margin-top: 1rem;
-    }
-
-    .feedback-buttons button {
-      margin-right: 0.5rem;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #ffffff;
+      color: #000000;
+      margin: 0;
+      padding: 0;
     }
   </style>
 </head>
+
 <body>
-  <h1>Code Snippet Generator</h1>
+  <!-- HEADER -->
+<header class="header">
+  <img src="${logoUri}" alt="XandriaAI Logo" class="logo" />
+  <h1>XandriaAI:</h1>
+  <span class="subtle">Your AI-powered code snippet generator</span>
+</header>
 
-  <!-- Optional input area -->
-  <textarea id="codeInput" placeholder="Paste code here (optional, not used yet)"></textarea>
 
-  <!-- Response display area -->
-  <div id="snippetBox">Press the button to generate a snippet...</div>
+  <!-- MAIN CONTENT -->
+  <div class="container">
+    <!-- Input Section -->
+    <section class="card">
+      <label class="field-label" for="codeInput">Input Code</label>
+      <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
+      
+      <div class="row">
+        <div class="btn-group">
+          <button id="generate" class="btn primary">
+            <i class="codicon codicon-play"></i> Generate
+          </button>
+          <button id="clear" class="btn">
+            <i class="codicon codicon-trash"></i> Clear
+          </button>
+        </div>
+        <div id="status" class="status" aria-live="polite"></div>
+      </div>
+    </section>
 
-  <!-- Generate snippet -->
-  <button id="generateSnippet">Generate Snippet</button>
+    <!-- Output Section -->
+    <section class="card">
+      <div class="card-header">
+        <span>Output</span>
+        <div class="tools">
+          <button id="copy" class="icon-btn" title="Copy to Clipboard">
+            📋
+          </button>
+        </div>
+      </div>
+      <pre id="output" class="output">💡 Press "Generate" to create a snippet!</pre>
+    </section>
+  </div>
 
+    <!-- Feedback Section -->
+    <section class="card">
+      <div class="card-header">
+        <span>Feedback</span>
+      </div>
+      <textarea id="feedbackInput" placeholder="Share feedback on this snippet..."></textarea>
+      <div class="row">
+        <button id="sendFeedback" class="btn">
+          💬 Send Feedback
+        </button>
+      </div>
+    </section>
+
+
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" hidden>
+    <i class="codicon codicon-info"></i>
+    <span id="toastText"></span>
+  </div>
+
+  <!-- JS SCRIPT -->
   <script>
     const vscode = acquireVsCodeApi();
 
-    document.getElementById('generateSnippet').addEventListener('click', () => {
-      vscode.postMessage({ command: 'getSnippet' });
+// Handle Generate button
+document.getElementById("generate").addEventListener("click", () => {
+  const codeInput = document.getElementById("codeInput").value.trim();
+  const status = document.getElementById("status");
+
+  if (!codeInput) {
+    // If empty, show a toast (non-blocking, pretty)
+    showToast("⚠️ Please paste or type code before generating!");
+    status.textContent = "No input provided.";
+    return; // stop here
+  }
+
+  // If code is present, continue normally
+  vscode.postMessage({ command: "getSnippet" });
+  status.textContent = "Generating...";
+});
+
+
+    // Handle Clear button
+    document.getElementById("clear").addEventListener("click", () => {
+      document.getElementById("codeInput").value = "";
+      document.getElementById("output").textContent = '💡 Press "Generate" to create a snippet!';
+      document.getElementById("status").textContent = "";
     });
 
-    window.addEventListener('message', (event) => {
-      const message = event.data;
-      const display = document.getElementById('snippetBox');
-
-      if (message.command === 'displaySnippet') {
-        display.innerHTML = `
-          <pre><code>${message.snippet}</code></pre>
-          <div class="feedback-buttons">
-            <button onclick="sendFeedback('👍')">👍</button>
-            <button onclick="sendFeedback('👎')">👎</button>
-          </div>
-        `;
-      }
-
-      // ✅ Handle formatted JSON display
-      else if (message.command === 'displayFormatted') {
-        display.innerHTML = `
-          <h3>Formatted Response</h3>
-          <pre><code>${JSON.stringify(message.payload, null, 2)}</code></pre>
-        `;
+    // Handle Copy button
+    document.getElementById("copy").addEventListener("click", async () => {
+      try {
+        const text = document.getElementById("output").textContent;
+        await navigator.clipboard.writeText(text);
+        showToast("Copied to clipboard!");
+      } catch {
+        showToast("Copy failed");
       }
     });
 
-    function sendFeedback(value) {
-      vscode.postMessage({
-        command: 'feedback',
-        value: value
-      });
+    // Listen for messages from VSCode
+    window.addEventListener("message", (event) => {
+      const { command, snippet, payload } = event.data;
+      const output = document.getElementById("output");
+      const status = document.getElementById("status");
+
+      if (command === "displaySnippet") {
+        output.textContent = snippet || "No snippet received.";
+        status.textContent = "Done.";
+      } else if (command === "displayFormatted") {
+        output.textContent = JSON.stringify(payload, null, 2);
+        status.textContent = "Done.";
+      }
+    });
+
+    // Toast notification
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      const toastText = document.getElementById("toastText");
+      toastText.textContent = msg;
+      toast.hidden = false;
+      toast.style.opacity = "1";
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => (toast.hidden = true), 300);
+      }, 1800);
     }
   </script>
 </body>

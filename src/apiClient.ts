@@ -1,31 +1,43 @@
 // Ricky Morival 1.4 Section + Alexandra Sanzare 3.1 Section
+// ✅ Production-Safe Version – November 2025
+// Routes all traffic through your FastAPI backend only.
+// No Gemini API key is ever loaded or sent from the frontend.
 
-import * as vscode from 'vscode';
-import * as https from 'https';
+/* eslint-disable no-console */
+import * as vscode from "vscode";
+import * as https from "https";
 
 export type RequestOptions = {
   path: string;
-  method?: 'GET' | 'POST';
+  method?: "GET" | "POST";
   body?: any;
   signal?: AbortSignal;
 };
 
+// ✅ Toggle this to show/hide console debug logs
+const DEBUG = true;
+
 export class ApiClient {
   constructor(private readonly context: vscode.ExtensionContext) {}
 
+  // ✅ Determines whether we’re using Render (production) or local FastAPI (dev)
   private get config() {
-    const cfg = vscode.workspace.getConfiguration('xandriaai');
+    const isRender = !vscode.env.remoteName;
+
+    const baseUrl = isRender
+      ? "https://xandriaai.onrender.com" // Hosted backend (Render)
+      : "http://127.0.0.1:8001";         // Local backend
+
     return {
-      baseUrl: String(cfg.get('serverBaseUrl') || 'http://127.0.0.1:8000'), // 👈 default backend
-      allowInsecure: Boolean(cfg.get('allowInsecureTls') || false),
-      timeoutMs: Number(cfg.get('requestTimeoutMs') || 10000),
+      baseUrl,
+      allowInsecure: !isRender,
+      timeoutMs: 10000,
     };
   }
 
-  async request<T = any>({ path, method='GET', body, signal }: RequestOptions): Promise<T> {
+  // ✅ Generic request wrapper – all backend calls go through this
+  async request<T = any>({ path, method = "GET", body, signal }: RequestOptions): Promise<T> {
     const { baseUrl, allowInsecure, timeoutMs } = this.config;
-    const token = await this.context.secrets.get('xandriaai.apiToken');
-    if (!token) throw new Error('Missing API token. Run “XandriaAI: Set API Token”.');
 
     let controller: AbortController | undefined;
     let timeout: NodeJS.Timeout | undefined;
@@ -37,45 +49,77 @@ export class ApiClient {
       finalSignal = controller.signal;
     }
 
+    // ✅ Backend handles authentication and API key internally
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+
+    const endpoint = new URL(path, baseUrl).toString();
+
     try {
-      const res = await fetch(new URL(path, baseUrl).toString(), {
+      if (DEBUG) {
+        console.log("🚀 [XandriaAI Request Started]");
+        console.log("   ➤ Endpoint:", endpoint);
+        console.log("   ➤ Method:", method);
+        console.log("   ➤ Body:", body ? JSON.stringify(body) : "(none)");
+      }
+
+      const res = await fetch(endpoint, {
         method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers,
         body: body ? JSON.stringify(body) : undefined,
+        mode: "cors",
+        signal: finalSignal,
         // @ts-ignore
         agent: allowInsecure ? new https.Agent({ rejectUnauthorized: false }) : undefined,
-        signal: finalSignal
       });
 
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(`HTTP ${res.status} ${res.statusText}: ${text || 'No response body'}`);
+        throw new Error(`HTTP ${res.status} ${res.statusText}: ${text || "No response body"}`);
       }
 
-      const ct = res.headers.get('content-type') || '';
-      if (ct.includes('application/json')) return await res.json() as T;
-      return (await res.text()) as unknown as T;
-    } catch (err: any) {
-      if (err?.name === 'AbortError') {
-        throw new Error('Request timed out. Increase xandriaai.requestTimeoutMs or try again.');
+      const contentType = res.headers.get("content-type") || "";
+      const data = contentType.includes("application/json")
+        ? await res.json()
+        : await res.text();
+
+      if (DEBUG) {
+        console.log("✅ [XandriaAI Response OK]");
+        console.log("   ➤ Status:", res.status);
+        console.log("   ➤ Type:", contentType);
+        console.log("   ➤ Data:", data);
       }
+
+      return data as T;
+    } catch (err: any) {
+      console.error("❌ [XandriaAI Fetch Error]");
+      console.error("   ➤ Endpoint:", endpoint);
+      console.error("   ➤ Method:", method);
+      console.error("   ➤ Error:", err);
+      vscode.window.showErrorMessage(`⚠️ Request failed: ${err.message || err}`);
       throw err;
     } finally {
       if (timeout) clearTimeout(timeout);
     }
   }
 
-  // 4.2 – OpenAI snippet suggestion
-  async getSuggestedSnippet(payload: { language: string; codeContext: string }): Promise<{snippet:string}> {
-    return this.request<{snippet:string}>({ path: '/api/snippet', method: 'POST', body: payload });
+  // ✅ Snippet generation endpoint
+  async getSuggestedSnippet(payload: { language: string; codeContext: string }): Promise<{ snippet: string }> {
+    return this.request<{ snippet: string }>({
+      path: "/process",
+      method: "POST",
+      body: payload,
+    });
   }
 
-  // 3.1 – AST analysis
+  // ✅ Static analysis endpoint
   async analyzeCode(payload: { code: string; languageId: string; fileName: string }): Promise<any> {
-    return this.request<any>({ path: '/api/analyze', method: 'POST', body: payload });
+    return this.request<any>({
+      path: "/analyze",
+      method: "POST",
+      body: payload,
+    });
   }
 }

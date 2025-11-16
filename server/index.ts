@@ -3,7 +3,7 @@ import path from 'path';
 import https from 'https';
 import express from 'express';
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 8443;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 8001;
 const API_TOKEN = process.env.XANDRIAAI_TOKEN || 'dev-token';
 
 // Use your own certificate in production

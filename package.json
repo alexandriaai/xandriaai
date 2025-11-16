@@ -3,13 +3,22 @@
   "displayName": "XandriaAI",
   "description": "AI-Powered Coding Assistant that suggests code snippets.",
   "version": "0.0.1",
-  "publisher": "your-name-or-org",
+  "publisher": "Randolphpierre",
   "engines": {
     "vscode": "^1.103.0"
   },
+  "icon": "xandria_logo.png",
   "categories": [
     "Other"
   ],
+
+"repository": {
+  "type": "git",
+  "url": "https://github.com/alexandriaai/xandriaai.git"
+},
+
+
+
   "activationEvents": [
     "*",
     "onCommand:xandriaai.showPanel",
@@ -55,8 +64,8 @@
       "properties": {
         "xandriaai.serverBaseUrl": {
           "type": "string",
-          "default": "http://127.0.0.1:8443",
-          "markdownDescription": "Base URL for the XandriaAI backend server (e.g. http://127.0.0.1:8443 or https://your-host)."
+          "default": "http://127.0.0.1:8001",
+          "markdownDescription": "Base URL for the XandriaAI backend server (e.g. http://127.0.0.1:8001 or https://your-host)."
         },
         "xandriaai.allowInsecureTls": {
           "type": "boolean",
@@ -73,20 +82,22 @@
     }
   },
   "scripts": {
-   "vscode:prepublish": "npm run compile",
-  "compile": "tsc -p ./",
-  "watch": "tsc -watch -p ./",
-  "pretest": "npm run compile && npm run lint",
-  "lint": "eslint src",
-  "sonarlint": "sonarlint ./src",
-  "test": "if [ \"$CI\" = \"true\" ]; then echo \"Skipping vscode-test in CI\"; else vscode-test; fi",
-  "build": "tsc -p .",
-  "server": "tsx ./server/index.ts"
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "sonarlint": "sonarlint ./src",
+    "test": "if [ \"$CI\" = \"true\" ]; then echo \"Skipping vscode-test in CI\"; else vscode-test; fi",
+    "build": "tsc -p .",
+    "server": "tsx ./server/index.ts"
   },
   "devDependencies": {
+    "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.18.1",
+    "@types/node-fetch": "^2.6.13",
     "@types/vscode": "^1.103.0",
     "@typescript-eslint/eslint-plugin": "^8.39.0",
     "@typescript-eslint/parser": "^8.39.0",
@@ -101,6 +112,8 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "node-fetch": "^2.7.0"
   }
 }
